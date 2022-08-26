@@ -33,30 +33,21 @@
 ;   6) BIOS expansions (160 KB): self-explanatory;
 ;   7) Motherboard BIOS (64 KB): main BIOS code.
 
-; To write "Hello" to the standard output, we can use the
-; interrupt vector 0x10, which handles generic video
-; services; when the interrupt request is issued, it will
-; look up in the AH register the number of the desired
-; subfunction to perform (in our case, teletype output, or
-; TTY, which prints one character and advances the cursor).
-; Finally, the AL register contains the character to be
-; printed.
-mov ah, 0x0e
+mov bx, HELLO
+call print
+call print_nwl
 
-mov al, 'H'
-int 0x10
-mov al, 'e'
-int 0x10
-mov al, 'l'
-int 0x10
-int 0x10
-mov al, 'o'
-int 0x10
+mov dx, 0xBA1E
+call print_hex
 
 jmp $ ; jumps to the current adress, which performs an
     ; infinite loop (note that this doesn't mean that the
     ; code in the next lines won't be executed, as it only
     ; declares bytes in memory).
+
+%include "print.asm"
+
+HELLO: db "Hello world", 0
 
 times 510 - ($-$$) db 0 ; fill all but two of the remaining 
     ; bytes with 0s: times x OP repeats OP x times, and $-$$
