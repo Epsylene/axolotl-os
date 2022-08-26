@@ -1,4 +1,15 @@
 
+[org 0x7c00] ; assembler instrution (as in compiler) that
+    ; specifies the base adress of the section of the file.
+    ; This is needed because jmp instructions cannot always
+    ; operate on relative adresses ("near" or "short" jumps);
+    ; if the adress called is sufficiently distant, a "far
+    ; jump" is performed, that takes an adress specified as a
+    ; segment:offset pair. By default, this offset is 0x0, but
+    ; our program is loaded on 0x7c00; the org directive adds
+    ; 0x7c00 to the offset of the far jump so it can work as
+    ; intended.
+
 ; The "lower memory" layout (that is, the layout of the
 ; first bytes of the computer memory, going from 0x0 to
 ; 0x9FFFF) is like so:
