@@ -33,12 +33,20 @@
 ;   6) BIOS expansions (160 KB): self-explanatory;
 ;   7) Motherboard BIOS (64 KB): main BIOS code.
 
-mov bx, HELLO
-call print
-call print_nwl
+mov [BOOT_DISK], dl ; the BIOS stores the boot disk in DL
 
-mov dx, 0xBA1E
-call print_hex
+mov bp, 0x8000 ; Put the stack
+mov sp, bp     ; out of the way.
+
+mov bx, 0x9000 ; write at 0x9000 2 sectors
+mov dh, 2      ; read from the disk.
+call load_disk
+
+mov dx, [0x9000] ; print what is at the beginning of the
+call print_hex   ; second sector
+call print_nwl
+mov dx, [0x9000 + 512]
+call print_hex ; same for the third sector
 
 jmp $ ; jumps to the current adress, which performs an
     ; infinite loop (note that this doesn't mean that the
@@ -46,8 +54,9 @@ jmp $ ; jumps to the current adress, which performs an
     ; declares bytes in memory).
 
 %include "print.asm"
+%include "disk_load.asm"
 
-HELLO: db "Hello world", 0
+BOOT_DISK: db 0
 
 times 510 - ($-$$) db 0 ; fill all but two of the remaining 
     ; bytes with 0s: times x OP repeats OP x times, and $-$$
@@ -57,3 +66,9 @@ times 510 - ($-$$) db 0 ; fill all but two of the remaining
 dw 0xaa55 ; "magic number" that tells the BIOS that this is
     ; indeed a bootloader. Maybe used because 1010 1010 0101 
     ; 0101 is pretty, idk.
+
+; When loading a hard drive, sector 1 of the disk is this
+; very bootloader; sections 2 and 3 follow, filled with
+; sample data (note that they are 512 bytes each).
+times 256 dw 0xeeee
+times 256 dw 0xcafe
