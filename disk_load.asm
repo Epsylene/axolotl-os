@@ -1,3 +1,9 @@
+PROGRAM_SPACE equ 0x7e00 ; 'equ' does the same as '#define',
+    ; that is, replacing all ocurrences of "PROGRAM_SPACE"
+    ; with "0x7e00", without actually allocating any data;
+    ; note that 0x7e00 is exactly 512 bytes away from 0x7c00,
+    ; which is the starting adress of our bootloader.
+
 load_disk:
     ; Disk reading is done using the Cylinder-Head-Sector
     ; (CHS) adressing; this is because in reality, hard disk

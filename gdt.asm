@@ -1,7 +1,7 @@
 ; Soon after appearing, 16-bits computers were confronted
 ; with the memory adressing problem: how could the OS
-; process an adress which lied beyond the 64 KB (2^16) limit
-; ? The solution used was segment-based adressing : a
+; process an adress which lied beyond the 64 KB (2^16)
+; limit? The solution used was segment-based adressing : a
 ; special register, termed "segment register", could be
 ; given a "base adress", which would be shifted 4 bits to
 ; the left and then added to an offset to end up at the
