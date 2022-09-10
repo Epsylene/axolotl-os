@@ -79,6 +79,9 @@ enable_A20:
 
 [bits 32]
 
+%include "cpuid.asm"
+%include "simple_paging.asm"
+
 start_protected_mode:
     ; Now in protected mode, the old segments are meaningless,
     ; so we point them to the new data segment descriptor.
@@ -92,4 +95,34 @@ start_protected_mode:
     mov ebp, 0x90000 ; update our stack position so it is
     mov esp, ebp     ; right at the top of the free space
 
-    call begin_protected_mode
+    ; Stepping up to 64 bits requires entering what is called
+    ; "long mode", where 64 bit programs are run in a sub-mode
+    ; called "64-bit mode", and protected mode programs run in
+    ; another sub-mode called "compatibility mode"; real mode
+    ; programs are not allowed to run in long mode, however.
+    ; Before entering long mode, we have to check if it is
+    ; actually available on our CPU :
+    call detect_cpuid
+    call detect_long_mode
+    call set_up_identity_paging
+    call edit_gdt
+
+    jmp CODE_SEG:start_64_bit
+
+[bits 64]
+
+start_64_bit:
+    mov edi, 0xb8000 ; this is the text screen video memory
+        ; adress for colour monitors
+    mov rax, 0x1f201f201f201f20 ; Move hexcode for three white
+        ; spaces with blue background (0x1f is white on blue
+        ; -more info in print.asm-, 20 is ASCII for a
+        ; space)
+    mov ecx, 500 ; we will want to repeat the instruction
+        ; 500 times (see below)
+    rep stosq ; the REP instruction performs like the LOOP
+        ; instruction, by repeating [ecx] times, but only
+        ; with a certain set of string instructions, like
+        ; STOS (STOSQ being the 64-bit version, which copies
+        ; RAX at [EDI])
+    jmp begin_long_mode

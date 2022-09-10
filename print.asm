@@ -99,7 +99,7 @@ print_nwl:
 
 VIDEO_MEMORY equ 0xb8000
 
-print_pm:
+print_32:
     ; In real mode, we used interrupt instructions to print
     ; characters to the screen because it was simple
     ; -although not the fastest. However, in protected mode

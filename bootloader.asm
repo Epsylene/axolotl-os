@@ -38,33 +38,22 @@ mov [BOOT_DISK], dl ; the BIOS stores the boot disk in DL
 mov bp, 0x9000
 mov sp, bp
 
-mov bx, TEST_STRING
-call print
-
 call enter_protected_mode
 
-jmp $ ; jumps to the current adress, which performs an
-    ; infinite loop (note that this doesn't mean that the
-    ; code in the next lines won't be executed, as it only
-    ; declares bytes in memory).
+jmp $
 
 %include "print.asm"
 %include "gdt.asm"
 %include "disk_load.asm"
-%include "protected_mode.asm"
+%include "long_mode.asm"
 
 BOOT_DISK: db 0
 
-[bits 32]
+[bits 64]
 
-begin_protected_mode:
-
-mov ebx, TEST_STRING
-call print_pm
+begin_long_mode:
 
 jmp $
-
-TEST_STRING: db "string", 0
 
 times 510 - ($-$$) db 0 ; fill all but two of the remaining 
     ; bytes with 0s: times x OP repeats OP x times, and $-$$
