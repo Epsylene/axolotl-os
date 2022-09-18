@@ -1,4 +1,9 @@
-[bits 16]
+[org 0x7e00]
+
+jmp enter_protected_mode
+
+%include "gdt.asm"
+%include "print.asm"
 
 enter_protected_mode:
     ; When starting the computer, the CPU first boots in what
@@ -112,7 +117,7 @@ start_protected_mode:
 [bits 64]
 
 start_64_bit:
-    mov edi, 0xb8000 ; this is the text screen video memory
+    mov rdi, 0xb8000 ; this is the text screen video memory
         ; adress for colour monitors
     mov rax, 0x1f201f201f201f20 ; Move hexcode for three white
         ; spaces with blue background (0x1f is white on blue
@@ -125,4 +130,7 @@ start_64_bit:
         ; with a certain set of string instructions, like
         ; STOS (STOSQ being the 64-bit version, which copies
         ; RAX at [EDI])
-    jmp begin_long_mode
+
+    jmp $
+
+times 2048 - ($-$$) db 0

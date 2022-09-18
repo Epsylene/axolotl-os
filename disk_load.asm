@@ -4,7 +4,7 @@ PROGRAM_SPACE equ 0x7e00 ; 'equ' does the same as '#define',
     ; note that 0x7e00 is exactly 512 bytes away from 0x7c00,
     ; which is the starting adress of our bootloader.
 
-load_disk:
+disk_load:
     ; Disk reading is done using the Cylinder-Head-Sector
     ; (CHS) adressing; this is because in reality, hard disk
     ; drives are made of several metal tracks paired with
@@ -41,9 +41,12 @@ load_disk:
 
     ret
 
+%include "print.asm"
+
 disk_error:
     mov bx, DISK_ERR_STR
     call print
     jmp $
 
+BOOT_DISK: db 0
 DISK_ERR_STR: db "Disk read error", 0

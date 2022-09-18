@@ -1,4 +1,3 @@
-
 print:
     pusha ; the push instructions takes a register and places
         ; it on top of the stack; pusha does the same, but
@@ -146,3 +145,26 @@ print_32:
     .end:
     popa
     ret
+
+[bits 64]
+
+print_64:
+    mov rdx, VIDEO_MEMORY
+
+    .loop:
+    mov al, [rbx]
+    mov ah, 0x1f
+    cmp al, 0
+    je .end
+
+    mov [rdx], ax
+    add rbx, 1
+    add rdx, 2
+
+    jmp .loop
+
+    .end:
+    ; popa
+    ret
+
+[bits 16]

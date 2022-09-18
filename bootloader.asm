@@ -33,27 +33,25 @@
 ;   6) BIOS expansions (160 KB): self-explanatory;
 ;   7) Motherboard BIOS (64 KB): main BIOS code.
 
-mov [BOOT_DISK], dl ; the BIOS stores the boot disk in DL
-
-mov bp, 0x9000
+mov bp, 0x7c00
 mov sp, bp
 
-call enter_protected_mode
+mov bx, PROGRAM_SPACE ; PROGRAM_SPACE is 0x7e00, which is
+    ; 512 bytes further than 0x7c00, just at the end of the
+    ; main body of the bootloader
+mov [BOOT_DISK], dl ; the BIOS stores the boot disk in DL
+mov dh, 4 ; read 4 sectors (because our extended program
+    ; is 2048 bytes long and a sector is 512 bytes)
+call disk_load
 
-jmp $
+jmp PROGRAM_SPACE ; After having read the disk, we jump to
+    ; the extended program space, right after the bootloader
+    ; space. This is done so we can work with more space, as
+    ; the bootloader is confined to this 512-byte region
+    ; (the boot sector); we call this jumping from the
+    ; "first-stage" to the "second-stage" bootloader.
 
-%include "print.asm"
-%include "gdt.asm"
 %include "disk_load.asm"
-%include "long_mode.asm"
-
-BOOT_DISK: db 0
-
-[bits 64]
-
-begin_long_mode:
-
-jmp $
 
 times 510 - ($-$$) db 0 ; fill all but two of the remaining 
     ; bytes with 0s: times x OP repeats OP x times, and $-$$
