@@ -1,9 +1,3 @@
-PROGRAM_SPACE equ 0x7e00 ; 'equ' does the same as '#define',
-    ; that is, replacing all ocurrences of "PROGRAM_SPACE"
-    ; with "0x7e00", without actually allocating any data;
-    ; note that 0x7e00 is exactly 512 bytes away from 0x7c00,
-    ; which is the starting adress of our bootloader.
-
 disk_load:
     ; Disk reading is done using the Cylinder-Head-Sector
     ; (CHS) adressing; this is because in reality, hard disk
@@ -17,36 +11,54 @@ disk_load:
     ; of the first platter, 1 the other side, 2 the first side
     ; of the second platter, etc).
 
-    push dx ; we will need it later
+    ; Always first save the registers
+    push ax
+    push bx
+    push cx
+    push dx
 
+    push cx
+
+    mov al, cl ; read CL sectors
+    mov cl, bl ; start reading from sector BL
+    mov bx, dx ; destination adress of the load
+    mov ch, 0x00 ; select cylinder 0
+    mov dh, 0x00 ; select head 0 (first side of the
+        ; first platter)
     mov dl, [BOOT_DISK] ; read disk BOOT_DISK (provided by
         ; the BIOS)
-    mov ch, 0x00 ; select cylinder 0
-    mov al, dh ; read DH sectors
-    mov dh, 0x00 ; select head 0 (first side of the first
-        ; platter)
-    mov cl, 0x02 ; start reading from sector 2
-
+    
     mov ah, 0x02 ; BIOS read sector function
     int 0x13 ; interrupt call 0x13, for hard disk and floppy
         ; disk read and write services
     jc disk_error ; if there is an error, the carry flag
         ; will be set, and a jump will be performed
 
-    pop dx
-    cmp dh, al ; if the number of sectors actually read (AL)
+    pop bx
+    cmp al, bl ; if the number of sectors actually read (AL)
         ; is not the same as the expected number of sectors
         ; to be read (DH)...
     jne disk_error ; ...jump to the error function.
 
-    ret
+    mov bx, LOADED_DISK
+    call printn
 
-%include "print.asm"
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
 
 disk_error:
     mov bx, DISK_ERR_STR
     call print
+
+    shr ax, 8
+    mov bx, ax
+    call print_hex
+    call print_nwl
+
     jmp $
 
-BOOT_DISK: db 0
-DISK_ERR_STR: db "Disk read error", 0
+DISK_ERR_STR: db "Disk read error, code ", 0
+LOADED_DISK: db "New sectors loaded", 0

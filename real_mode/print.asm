@@ -79,14 +79,14 @@ HEX_OUT: db '0x0000', 0
 print_nwl:
     ; This function is necessary because classic newline
     ; character '\n' doesn't work (it will simply be printed
-    ; as-is with the rest of characters).
+    ; as-is with the rest of the characters).
     pusha
 
     mov ah, 0x0e
     mov al, 0x0a ; newline character (\n)
     int 0x10
     mov al, 0x0d ; carriage return (\r; if this is not 
-        ; included, the cursor will indeed move on line down,
+        ; included, the cursor will indeed move one line down,
         ; but on the same column, without returning to the
         ; start of the line)
     int 0x10
@@ -94,77 +94,7 @@ print_nwl:
     popa
     ret
 
-[bits 32]
-
-VIDEO_MEMORY equ 0xb8000
-
-print_32:
-    ; In real mode, we used interrupt instructions to print
-    ; characters to the screen because it was simple
-    ; -although not the fastest. However, in protected mode
-    ; we are not able to access BIOS (because it is written
-    ; in 16 bits), so we have to print in a slightly more
-    ; complex manner, by accessing the video memory
-    ; directly.
-
-    ; The display device in a computer can be configured in
-    ; one of two different modes: graphics mode (classic
-    ; pixel-by-pixel screen manipulation) and text mode,
-    ; where the screen is divided in "character cells", each
-    ; of which displays a character from a fixed font set;
-    ; by default, the graphics hardware used is VGA (Video
-    ; Graphics Array) colour text mode with 80x25
-    ; characters. To print some string, one simply needs to
-    ; access the video memory, which is located at 0xb8000.
-    pusha
-    mov edx, VIDEO_MEMORY
-
-    .loop:
-    mov al, [ebx] ; the string is located at EBX, so store
-        ; the first character in AL
-    mov ah, 0x1f ; text mode memory takes two bytes per
-        ; character on screen: one for the actual character,
-        ; and one that carries the foreground colour in its
-        ; lowest 4 bits and the background colours in the
-        ; upper 3 bits (the last bit interpretation
-        ; depending on hardware configuration). Here, 0x1f =
-        ; 0001'1111b, which corresponds to white (1111) on
-        ; blue (001) (yes, the Blue Screen of Death !).
-    
-    cmp al, 0 ; check against the end of the string
-    je .end
-
-    mov [edx], ax ; store the character (AL) and attributes
-        ; (AH) combined (AX) at current character cell (EDX)
-    add ebx, 1 ; move the string iterator by one character
-    add edx, 2 ; move the video memory iterator by two bytes
-        ; (one for the character and one for the attributes)
-
-    jmp .loop
-
-    .end:
-    popa
+printn:
+    call print
+    call print_nwl
     ret
-
-[bits 64]
-
-print_64:
-    mov rdx, VIDEO_MEMORY
-
-    .loop:
-    mov al, [rbx]
-    mov ah, 0x1f
-    cmp al, 0
-    je .end
-
-    mov [rdx], ax
-    add rbx, 1
-    add rdx, 2
-
-    jmp .loop
-
-    .end:
-    ; popa
-    ret
-
-[bits 16]

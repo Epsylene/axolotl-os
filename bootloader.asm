@@ -33,25 +33,30 @@
 ;   6) BIOS expansions (160 KB): self-explanatory;
 ;   7) Motherboard BIOS (64 KB): main BIOS code.
 
-mov bp, 0x7c00
+mov bp, 0x0500
 mov sp, bp
 
-mov bx, PROGRAM_SPACE ; PROGRAM_SPACE is 0x7e00, which is
-    ; 512 bytes further than 0x7c00, just at the end of the
-    ; main body of the bootloader
-mov [BOOT_DISK], dl ; the BIOS stores the boot disk in DL
-mov dh, 4 ; read 4 sectors (because our extended program
-    ; is 2048 bytes long and a sector is 512 bytes)
+mov bx, HELLO_WORLD
+call printn
+
+mov byte[BOOT_DISK], dl ; the BIOS stores the boot disk in DL
+mov bx, 2 ; Read from sector 2 (sector 1 is this very bootloader)...
+mov cx, 2 ; ...and load 2 sectors from there.
+mov dx, 0x7e00 ; 0x7e00 is 512 bytes further than 0x7c00, 
+    ; just at the end of the main body of the bootloader
 call disk_load
 
-jmp PROGRAM_SPACE ; After having read the disk, we jump to
-    ; the extended program space, right after the bootloader
-    ; space. This is done so we can work with more space, as
-    ; the bootloader is confined to this 512-byte region
-    ; (the boot sector); we call this jumping from the
-    ; "first-stage" to the "second-stage" bootloader.
+call elevate_pm
 
-%include "disk_load.asm"
+jmp $
+
+%include "real_mode/load.asm"
+%include "real_mode/print.asm"
+%include "real_mode/gdt.asm"
+%include "real_mode/elevate.asm"
+
+BOOT_DISK: db 0
+HELLO_WORLD: db "Hello world from the bootloader", 0
 
 times 510 - ($-$$) db 0 ; fill all but two of the remaining 
     ; bytes with 0s: times x OP repeats OP x times, and $-$$
@@ -61,3 +66,44 @@ times 510 - ($-$$) db 0 ; fill all but two of the remaining
 dw 0xaa55 ; "magic number" that tells the BIOS that this is
     ; indeed a bootloader. Maybe used because 1010 1010 0101 
     ; 0101 is pretty, idk.
+
+extended_program:
+
+[bits 32]
+
+call clear_32
+
+mov esi, PROTECTED_MODE
+call printn_32
+
+call elevate_lm
+
+jmp $
+
+%include "protected_mode/clear.asm"
+%include "protected_mode/print.asm"
+%include "protected_mode/elevate.asm"
+
+PROTECTED_MODE: db "Now in protected mode", 0
+
+times 512 - ($ - extended_program) db 0
+
+extended_program_64:
+
+[bits 64]
+
+mov rdi, WHITE_ON_BLUE
+call clear_64
+
+mov rsi, LONG_MODE
+call printn_64
+
+jmp $
+
+%include "long_mode/clear.asm"
+%include "long_mode/print.asm"
+
+WHITE_ON_BLUE equ 0x1f
+LONG_MODE: db "Long mode up and running", 0
+
+times 512 - ($ - extended_program_64) db 0

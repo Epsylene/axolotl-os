@@ -21,6 +21,12 @@
 ; first need to define the GDT descriptor, which is the
 ; structure that contains the size and adress of the GDT:
 
+align 4 ; this will make data align in memory on a 4-byte
+    ; basis, which is the most efficient way to access
+    ; memory on 32-bit systems (up to 8 dwords reads at once,
+    ; assuming a 32-bit wide memory bus); data aligned this
+    ; way is often said to be "naturally aligned".
+
 gdt_start: ; label used for calculating the GDT size in the
     ; GDT descriptor later on
 
