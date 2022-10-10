@@ -41,7 +41,7 @@ call printn
 
 mov byte[BOOT_DISK], dl ; the BIOS stores the boot disk in DL
 mov bx, 2 ; Read from sector 2 (sector 1 is this very bootloader)...
-mov cx, 2 ; ...and load 2 sectors from there.
+mov cx, 3 ; ...and load 2 sectors from there.
 mov dx, 0x7e00 ; 0x7e00 is 512 bytes further than 0x7c00, 
     ; just at the end of the main body of the bootloader
 call disk_load
@@ -98,12 +98,16 @@ call clear_64
 mov rsi, LONG_MODE
 call printn_64
 
+call KERNEL_START
+
 jmp $
 
 %include "long_mode/clear.asm"
 %include "long_mode/print.asm"
 
 WHITE_ON_BLUE equ 0x1f
+KERNEL_START equ 0x8200
+
 LONG_MODE: db "Long mode up and running", 0
 
 times 512 - ($ - extended_program_64) db 0
