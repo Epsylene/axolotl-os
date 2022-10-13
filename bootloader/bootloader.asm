@@ -106,7 +106,11 @@ jmp $
 %include "long_mode/print.asm"
 
 WHITE_ON_BLUE equ 0x1f
-KERNEL_START equ 0x8200
+KERNEL_START equ 0x8200 ; 0x8200 is 0x7c00 + 512 (32-bit 
+    ; extended space) + 512 (64-bit extended space), so
+    ; we end up right after the code of the bootloader,
+    ; which will be in the file "entry.asm", at the start
+    ; of which our entry function is situated.
 
 LONG_MODE: db "Long mode up and running", 0
 

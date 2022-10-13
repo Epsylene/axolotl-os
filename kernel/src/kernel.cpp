@@ -1,4 +1,4 @@
-int main()
+extern "C" int main()
 {
     char* vga = (char*)0xb8000;
     *vga = 'P';
