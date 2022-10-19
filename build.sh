@@ -1,13 +1,12 @@
 #!/bin/bash
 
-# Things in parentheses are executed in a subshell
 (cd bootloader ; mkdir -p bin ; nasm -o bin/boot bootloader.asm)
-boot_result=$? # $? is the result of the last command
+boot_result=$?
 
-(make -C kernel) # -C tells make to make the provided directory
+(make -C kernel)
 make_result=$?
 
-echo "Make result: $make_result"
+echo Make Result: $make_result
 
 if [ "$boot_result" = "0" ] && [ "$make_result" = "0" ]
 then
