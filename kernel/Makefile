@@ -6,10 +6,9 @@ LD = ld.lld
 ASM = nasm
 
 INC = -Iinc/
-SRC = $(shell find . -type f -name "*.cpp")
+SRC = $(shell find src -type f -name "*.cpp")
 ASM_SRC = $(shell find . -type f -name "*.asm")
-
-OBJ = ${ASM_SRC:.asm=.o} ${SRC:.cpp=.o} 
+OBJ = $(SRC:%.cpp=%.o) $(ASM_SRC:%.asm=%.o)
 
 CCFLAGS = -ggdb -c -ffreestanding -target x86_64-none-elf
 LDFLAGS = -Ttext 0x8200
