@@ -1,8 +1,9 @@
-extern "C" int main()
+
+#include "text_print.hpp"
+
+extern "C" int main() 
 {
-    char* vga = (char*)0xb8000;
-    *vga = 'P';
-    *(vga + 1) = 0x4f;
+    set_cursor_pos(0, 0);
 
     return 0;
 }

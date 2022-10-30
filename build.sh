@@ -1,6 +1,8 @@
 #!/bin/bash
 
-(cd bootloader ; mkdir -p bin ; nasm -o bin/boot bootloader.asm)
+rm -f os.img
+
+(cd bootloader ; nasm -o boot bootloader.asm)
 boot_result=$?
 
 (make -C kernel)
@@ -10,14 +12,16 @@ echo Make Result: $make_result
 
 if [ "$boot_result" = "0" ] && [ "$make_result" = "0" ]
 then
-    cp bootloader/bin/boot ./os.img
-    cat kernel/bin/kernel >> os.img
+    cp bootloader/boot ./os.img
+    cat kernel/kernel >> os.img
 
     fsize=$(wc -c < os.img)
     sectors=$(( $fsize / 512 ))
 
     echo "Build finished successfully"
-    echo "ALERT: Adjust boot sector to load $sectors sectors"
+    echo "Adjust boot sector to load $sectors sectors"
+
+    (make -C kernel clean)
 
     qemu-system-x86_64.exe -drive format=raw,file=os.img
 else
