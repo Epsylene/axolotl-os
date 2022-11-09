@@ -1,8 +1,15 @@
 #pragma once
 
-#include "typedefs.hpp"
+#include "types.hpp"
 
-inline constexpr u32_t VGA_WIDTH = 80;
-inline constexpr u32_t VGA_HEIGHT = 25;
+namespace axlt
+{
+    inline constexpr u32_t VGA_WIDTH = 80;
+    inline constexpr u32_t VGA_HEIGHT = 25;
+    inline u8_t* const VGA_MEMORY = (u8_t*)0xb8000;
 
-void set_cursor_pos(u8_t x, u8_t y);
+    void set_cursor_pos(u16_t position);
+    void set_cursor_pos(u8_t x, u8_t y);
+
+    void print(string str);
+}
