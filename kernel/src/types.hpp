@@ -14,25 +14,27 @@ namespace axlt
 
     using size_t = u16_t;
 
-    class string
-    {
-        public:
+    // Put on hold until we have dynamic memory
+    //
+    // class string
+    // {
+    //     public:
 
-            char* str;
+    //         char* str;
 
-            string(char* str): str(str) {}
+    //         string(char* str): str(str) {}
 
-            string(size_t size, char c = ' ')
-            {
-                str = new char[size];
+    //         string(size_t size, char c = ' ')
+    //         {
+    //             str = new char[size];
 
-                for (size_t i = 0; i < size; i++)
-                {
-                    str[i] = c;
-                }
-            }
+    //             for (size_t i = 0; i < size; i++)
+    //             {
+    //                 str[i] = c;
+    //             }
+    //         }
 
-            char& operator[](size_t index) { return str[index]; }
-            char operator[](size_t index) const { return str[index]; }
-    };
+    //         char& operator[](size_t index) { return str[index]; }
+    //         char operator[](size_t index) const { return str[index]; }
+    // };
 }

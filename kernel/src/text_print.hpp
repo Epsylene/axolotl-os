@@ -11,5 +11,9 @@ namespace axlt
     void set_cursor_pos(u16_t position);
     void set_cursor_pos(u8_t x, u8_t y);
 
-    void print(string str);
+    template<typename T>
+    const char* hex_to_string(T value);
+
+    void print(const char* str);
+    void print(u32_t value);
 }

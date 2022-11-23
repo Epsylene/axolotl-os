@@ -41,7 +41,7 @@ call printn
 
 mov byte[BOOT_DISK], dl ; the BIOS stores the boot disk in DL
 mov bx, 2 ; Read from sector 2 (sector 1 is this very bootloader)...
-mov cx, 4 ; ...and load 3 sectors from there.
+mov cx, 5 ; ...and load enough sectors from there.
 mov dx, 0x7e00 ; 0x7e00 is 512 bytes further than 0x7c00, 
     ; just at the end of the main body of the bootloader
 call disk_load

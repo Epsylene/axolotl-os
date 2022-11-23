@@ -52,44 +52,73 @@ namespace axlt
         set_cursor_pos(position);
     }
 
-    // template<typename T>
-    // string hex_to_string(T value)
-    // {
-    //     u8_t count = syzeof(T)*2 - 1;
-    //     string output {count};
-
-    //     u8_t* car, temp;
-    //     for (u8_t i = 0; i < count; i++)
-    //     {
-    //         car = (u8_t*)(&value) + 1;
-            
-    //         temp = (*car & 0xF0) >> 4;
-    //         output[count - (i*2 + 1)] = temp + (temp > 9 ? 55 : 48);
-    //         temp = (*car & 0x0F);
-    //         output[count - (i*2 + 1)] = temp + (temp > 9 ? 55 : 48);
-    //     }
-
-    //     return output;
-    // }
-
-    void print(string str)
+    char output[128];
+    template<typename T>
+    const char* hex_to_string(T value)
     {
-        u16_t index = cursor_pos;
+        u8_t count = sizeof(T) - 1;
 
+        u8_t* car, temp;
+        for (u8_t i = 0; i < count; i++)
+        {
+            car = (u8_t*)(&value) + i;
+            
+            // Each byte contains two hexadecimal numbers (0-F
+            // is 16 = 2^4 values, so 4 bits), so we use masks
+            // to set one and then the other, in reverse order
+            // (because of the endianess). Then, using the ASCII
+            // table, we can transform those numbers into their
+            // corresponding characters: if the number is 0-9,
+            // we shift it by 48 (where number characters start
+            // in the table), if it is A-F, we shift it by 55
+            // (where uppercase letters start).
+            temp = (*car & 0xF0) >> 4;
+            output[count - (i*2 + 1)] = temp + (temp > 9 ? 55 : 48);
+            temp = (*car & 0x0F);
+            output[count - i*2] = temp + (temp > 9 ? 55 : 48);
+        }
+
+        output[count + 1] = '\0';
+
+        return output;
+    }
+
+    template const char* hex_to_string<s32_t>(s32_t);
+
+    void print(const char* str)
+    {
+        // Start at the cursor position, iterating character by
+        // character until we reach the null terminator.
+        u16_t index = cursor_pos;
         for (size_t i = 0; str[i] != '\0'; i++)
         {
             if(str[i] == '\n')
             {
+                // If the character is a line return, move one
+                // screen width to the right (which will wrap
+                // around and continue at the next line), then
+                // trim that to the first column (index %
+                // VGA_WIDTH is the new "cursor position",
+                // modulo the screen width; in other words, it's
+                // the space between the cursor and the left of
+                // the screen on the line it's writing on).
                 index += VGA_WIDTH;
                 index -= index % VGA_WIDTH;
             }
             else
             {
+                // Else, just write the character at the VGA
+                // memory, and move the cursor by one position.
                 *(VGA_MEMORY + index*2) = str[i];
                 index++;
             }
         }
 
         set_cursor_pos(index);
+    }
+    
+    void print(u32_t value)
+    {
+        print(hex_to_string(value));
     }
 }
