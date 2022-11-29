@@ -7,6 +7,24 @@ namespace axlt
 {
     u16_t cursor_pos;
 
+    void clear(u64_t color)
+    {
+        // Instead of writing a two bytes of the VGA memory at
+        // each iteration, we will do it 64 bits at a time, which
+        // is 4 words, each comprised of nothing in the first 8 bits
+        // (no character) and the color bits in the last 8.
+        u64_t chunk = 0;
+        chunk += color << 8;
+        chunk += color << 24;
+        chunk += color << 40;
+        chunk += color << 56;
+
+        for (u64_t* i = (u64_t*)VGA_MEMORY; i < (u64_t*)(VGA_MEMORY + 4000); i++)
+        {
+            *i = chunk;
+        }
+    }
+
     void set_cursor_pos(u16_t position)
     {
         // In text mode, the cursor doesn't do all those fancy
@@ -84,8 +102,7 @@ namespace axlt
     }
 
     template const char* hex_to_string<s32_t>(s32_t);
-
-    void print(const char* str)
+    void print(const char* str, u8_t color)
     {
         // Start at the cursor position, iterating character by
         // character until we reach the null terminator.
@@ -110,6 +127,7 @@ namespace axlt
                 // Else, just write the character at the VGA
                 // memory, and move the cursor by one position.
                 *(VGA_MEMORY + index*2) = str[i];
+                *(VGA_MEMORY + index*2 + 1) = color;
                 index++;
             }
         }
@@ -117,8 +135,8 @@ namespace axlt
         set_cursor_pos(index);
     }
     
-    void print(u32_t value)
+    void print(u32_t value, u8_t color)
     {
-        print(hex_to_string(value));
+        print(hex_to_string(value), color);
     }
 }
