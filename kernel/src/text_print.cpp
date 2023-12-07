@@ -9,10 +9,11 @@ namespace axlt
 
     void clear(u64_t color)
     {
-        // Instead of writing a two bytes of the VGA memory at
-        // each iteration, we will do it 64 bits at a time, which
-        // is 4 words, each comprised of nothing in the first 8 bits
-        // (no character) and the color bits in the last 8.
+        // Instead of writing two bytes of the VGA memory at
+        // each iteration, we will do it 64 bits at a time,
+        // which is 4 words, each comprised of nothing in the
+        // first 8 bits (no character) and the color bits in the
+        // last 8.
         u64_t chunk = 0;
         chunk += color << 8;
         chunk += color << 24;
@@ -30,7 +31,7 @@ namespace axlt
         // In text mode, the cursor doesn't do all those fancy
         // things like being positioned at the end of the text
         // or wrapping around the edge of the screen: it is
-        // simply a blanking underline (in the most common case;
+        // simply a blank underline (in the most common case;
         // note that the cursor shape too can be manipulated),
         // which we can place wherever we want on the screen. To
         // do so, we have to tell the VGA hardware by sending

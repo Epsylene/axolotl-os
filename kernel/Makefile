@@ -1,6 +1,6 @@
 CC = clang
 CXX = clang++
-GDB = gdb 
+GDB = gdb
 
 LD = ld.lld
 ASM = nasm
@@ -17,6 +17,12 @@ LDFLAGS = -Ttext 0x8200
 LDFLAGS_BIN = ${LDFLAGS} --oformat binary
 
 all: kernel kernel.elf
+
+# Note on Makefile sintax I will most surely have forgotten by
+# the next time I read this file: $@ means the current target
+# (e.g. "kernel"), $^ means all dependencies (e.g. "${OBJ}")
+# and $< means the first dependency (e.g. "${ASM_SRC:.asm=.o}")
+# (more at https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html).
 
 kernel: ${OBJ}
 	${LD} -o $@ ${LDFLAGS_BIN} $^
