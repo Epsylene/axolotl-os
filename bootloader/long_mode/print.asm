@@ -47,3 +47,4 @@ printn_64:
     ret
 
 CURRENT_LINE_64: dq 0
+WHITE_ON_BLUE equ 0x1f

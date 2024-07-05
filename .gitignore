@@ -1,7 +1,5 @@
 .vscode
 bin
 **.o
-kernel.elf
-kernel/kernel
-os.img
-boot
+**.img
+old
