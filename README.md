@@ -1,4 +1,5 @@
 # AxolotlOS
+![Hello Kernel](img/kernel.png)
 
 A (very early-stage) 64-bit OS, for fun.
 
@@ -9,7 +10,7 @@ Comprised for now almost exclusively of a bootloader, which:
 * Elevates from real mode to protected mode
 * Sets up identity paging
 * Elevates from protected mode to long mode
-* Calls the `main()` function in the kernel
+* Calls the `_start()` function in the kernel
 
 ## Ressources
 
