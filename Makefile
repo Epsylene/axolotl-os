@@ -22,7 +22,7 @@ build/boot.o: ${ASM}
 # Same for the kernel source files.
 build/kern.o: ${SRC}
 	cd kernel; \
-	cargo +nightly rustc --release -- --emit obj=kern.o; \
+	cargo rustc --release -- --emit obj=kern.o; \
 	mv kern.o ../build/kern.o
 
 # Marking two files as dependencies of the target both ensures
