@@ -1,6 +1,20 @@
-# 
+# We are trying to use Rust to compile an operating system that
+# does not exist yet, so we can't use the standard library
+# right away. We can, however, use a subset comprised of some
+# core systems and builtins by bundling them with the compiler
+# using the build-std feature.
 [unstable]
 build-std = ["core", "compiler_builtins"]
 
+# Our target platform is defined in a JSON file that specifies
+# some important information for the compiler, such as the LLVM
+# target (in the form of the target triplet machine-vendor-os,
+# here x86_64-unknown-none), the layout of the fundamental data
+# types in memory (32-bit aligned ints and floats, ...) the
+# endianness (little endian), the pointer width (64 bits), the
+# panic strategy (abort), features to disable SIMD (because
+# interrupts require the kernel to save and restore the state
+# of all registers each time, and SIMD registers are very
+# large, so they can considerably harm performance)...
 [build]
 target = "x86_64-axolotlos.json"
