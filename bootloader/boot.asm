@@ -30,8 +30,8 @@ global _boot
 
 section .boot.text
 _boot:
-    mov bp, 0x0500
-    mov sp, bp
+    ; mov bp, 0x0500
+    ; mov sp, bp
 
     mov bx, HELLO_WORLD
     call printn
@@ -43,7 +43,7 @@ _boot:
         ; just at the end of the main body of the bootloader
     call disk_load
 
-    call elevate_pm ; Elevate to protected mode
+    jmp elevate_pm ; Elevate to protected mode
 
 %include "real_mode/load.asm"
 %include "real_mode/print.asm"
@@ -64,12 +64,13 @@ dw 0xaa55 ; "magic number" that tells the BIOS that this is
 
 [bits 32]
 
+section .extended.text
 extended_program:
     call clear_32           ; Clear the screen and
     mov esi, PROTECTED_MODE ; print a welcome message
     call printn_32          ; to the user
 
-    call elevate_lm         ; Elevate to long mode
+    jmp elevate_lm         ; Elevate to long mode
 
 %include "protected_mode/clear.asm"
 %include "protected_mode/print.asm"
@@ -78,29 +79,17 @@ extended_program:
 
 PROTECTED_MODE: db "Now in protected mode", 0
 
-; times 512 - ($ - extended_program) db 0
-
 [bits 64]
 
 extended_program_64:
     mov rdi, WHITE_ON_BLUE
     call clear_64
-
     mov rsi, LONG_MODE
     call printn_64
-    jmp $
 
-    ; jmp _start
+    jmp _start
 
 %include "long_mode/clear.asm"
 %include "long_mode/print.asm"
 
-; KERNEL_START equ 0x8200 ; 0x8200 is 0x7c00 + 512 (32-bit 
-;     ; extended space) + 512 (64-bit extended space), so
-;     ; we end up right after the code of the bootloader,
-;     ; which will be in the file "entry.asm", at the start
-;     ; of which our entry function is situated.
-
 LONG_MODE: db "Long mode up and running", 0
-
-; times 512 - ($ - extended_program_64) db 0

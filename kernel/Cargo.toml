@@ -1,0 +1,15 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2021"
+
+# Set abort on panic instead of stack unwinding (which we
+# cannot provide at the start) for both the dev... 
+[profile.dev]
+panic = "abort"
+
+# ...and release profiles.
+[profile.release]
+panic = "abort"
+
+[dependencies]
