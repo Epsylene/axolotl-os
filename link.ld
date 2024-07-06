@@ -7,7 +7,8 @@ SECTIONS {
         *(.boot.text)
     }
 
-    /* From 0x7e00 onwards are the second stage and the kernel */
+    /* From 0x7e00 onwards are the second stage and the kernel
+    */
     .text 0x7e00 : {
         *(.extended.text)
         *(.text*)

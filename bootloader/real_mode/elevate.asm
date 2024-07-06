@@ -17,14 +17,13 @@ elevate_pm:
         ; CPU to ignore interrupts, which is necessary while
         ; setting up the GDT, because we don't know how to
         ; handle them yet.
-    lgdt [gdt_descriptor] ; tell the CPU about our brand new
-        ; shining bright wholesome and precious GDT
+    lgdt [gdt_descriptor] ; tell the CPU about our beautiful new GDT
 
     mov eax, cr0 ; These 3 instructions simply set the first
     or eax, 0x1  ; bit of the CR0 register to 1, which is what
     mov cr0, eax ; tells the CPU that we want to switch.
     
-    jmp CODE_SEG:start_protected_mode ; the reason for doing
+    jmp CODE_SEG:start_protected_mode ; The reason for doing
         ; a far jump here (segment:offset) instead of a near
         ; jump is CPU pipelining. When instructions arrive to
         ; the CPU, they go through different stages (fetching
@@ -64,7 +63,7 @@ enable_A20:
     ; instructions work with the FAST A20 option, which is part
     ; of the chipset on most newer computers.
 
-    in al, 0x92  ; on x86 CPUs, I/O devices share the adress
+    in al, 0x92  ; On x86 CPUs, I/O devices share the adress
     or al, 2     ; space with the memory (not the physical
     out 0x92, al ; space, but data labelling). To distinguish
                  ; between whether the CPU is talking to memory
@@ -88,7 +87,7 @@ start_protected_mode:
     mov fs, ax
     mov gs, ax
 
-    mov ebp, 0x90000 ; update our stack position so it is
+    mov ebp, 0x90000 ; Update our stack position so it is
     mov esp, ebp     ; right at the top of the free space
 
     jmp extended_program ; jump back to the bootloader, now

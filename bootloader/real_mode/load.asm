@@ -1,15 +1,14 @@
 disk_load:
-    ; Disk reading is done using the Cylinder-Head-Sector
-    ; (CHS) adressing; this is because in reality, hard disk
-    ; drives are made of several metal tracks paired with
-    ; two magnetic head arms to read and write data onto 
-    ; them (one for each side of the plate). The CHS 
-    ; adressing thus is a representation of the spatial
-    ; position of the data in the disk, where in cylindrical
-    ; coordinates, the cylinder corresponds to r, the sector
-    ; to theta, and the head to z (head 0 is the first side
-    ; of the first platter, 1 the other side, 2 the first side
-    ; of the second platter, etc).
+    ; Disk reading is done using the Cylinder-Head-Sector (CHS)
+    ; adressing; this is because in reality, hard disk drives
+    ; are made of several metal tracks paired with two magnetic
+    ; head arms to read and write data onto them (one for each
+    ; side of the plate). The CHS adressing thus is a
+    ; representation of the spatial position of the data in the
+    ; disk, where in cylindrical coordinates, the cylinder
+    ; corresponds to r, the sector to theta, and the head to z
+    ; (head 0 is the first side of the first platter, 1 the
+    ; other side, 2 the first side of the second platter, etc).
 
     ; Always first save the registers
     push ax
