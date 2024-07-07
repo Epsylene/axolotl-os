@@ -74,6 +74,15 @@ struct ScreenChar {
     color_code: ColorCode,
 }
 
+impl ScreenChar {
+    pub fn new(ascii_character: u8, color_code: ColorCode) -> ScreenChar {
+        ScreenChar {
+            ascii_character,
+            color_code,
+        }
+    }
+}
+
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 
@@ -96,19 +105,44 @@ impl Writer {
             // Printable ASCII byte
             byte => {
                 // If we are at the end of the line (after the
-                // 80th column), go to the next line
+                // 80th column), print a new line and start at
+                // the first column of the next row.
                 if self.column_position >= BUFFER_WIDTH {
                     self.new_line();
                 }
 
+                // Printing starts at the bottom left corner of
+                // the screen, so we just need to set the row
+                // to the height of the buffer minus one.
                 let row = BUFFER_HEIGHT - 1;
                 let col = self.column_position;
 
-                let color_code = self.color_code;
-                self.buffer.chars[row][col] = ScreenChar {
-                    ascii_character: byte,
-                    color_code,
+                // Then update the cell and the column position
+                // for the current character.
+                let color = self.color_code;
+                unsafe {
+                    // When dealing with MMIO, a problem can
+                    // arise when reading or writing to a
+                    // memory location. Say we are watching the
+                    // value at a certain address in a loop,
+                    // waiting for it to be changed by
+                    // hardware. Because there is no code
+                    // actually using the pointer, the compiler
+                    // might optimize the loop away. Marking
+                    // this kind of access as "volatile" tells
+                    // the compiler that there might be side
+                    // effects outside the scope of the
+                    // program, so we can't skip the memory
+                    // read or write operation.
+                    core::ptr::write_volatile(
+                        &mut self.buffer.chars[row][col],
+                        ScreenChar::new(byte, color)
+                    )
                 };
+                // self.buffer.chars[row][col] ScreenChar {
+                //     ascii_character: byte,
+                //     color_code,
+                // });
                 self.column_position += 1;
             }
         }
@@ -118,12 +152,16 @@ impl Writer {
         for byte in s.bytes() {
             match byte {
                 // Printable ASCII byte--anything between a
-                // space (0x20) and a tilde (~ 0x7e),
-                // basically--or a newline.
+                // space (0x20) and a tilde (~ 0x7e) in page
+                // 437, basically--or a newline.
                 0x20..=0x7e | b'\n' => self.write_byte(byte),
-                // Not part of the printable ASCII range, so we
+                // Other characters are not considered to be
+                // part of the printable ASCII range, so we
                 // output a filled square (■ 0xfe) character
-                // instead.
+                // instead. Note that this also works for UTF-8
+                // characters, since multi-byte code points are
+                // guaranteed to not have individual bytes in
+                // the ASCII range.
                 _ => self.write_byte(0xfe),
             }
         }
@@ -137,16 +175,17 @@ impl Writer {
                 self.buffer.chars[row - 1][col] = character;
             }
         }
+
         // Clear the last line
         self.clear_row(BUFFER_HEIGHT - 1);
         self.column_position = 0;
     }
 
     fn clear_row(&mut self, row: usize) {
-        let blank = ScreenChar {
-            ascii_character: b' ',
-            color_code: self.color_code,
-        };
+        // A blank is just a space with the same color code as
+        // the rest of characters.
+        let blank = ScreenChar::new(b' ', self.color_code);
+
         for col in 0..BUFFER_WIDTH {
             self.buffer.chars[row][col] = blank;
         }
