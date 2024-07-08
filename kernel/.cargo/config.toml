@@ -5,16 +5,33 @@
 # using the build-std feature.
 [unstable]
 build-std = ["core", "compiler_builtins"]
+build-std-features = ["compiler-builtins-mem"]
 
 # Our target platform is defined in a JSON file that specifies
-# some important information for the compiler, such as the LLVM
-# target (in the form of the target triplet machine-vendor-os,
-# here x86_64-unknown-none), the layout of the fundamental data
-# types in memory (32-bit aligned ints and floats, ...) the
-# endianness (little endian), the pointer width (64 bits), the
-# panic strategy (abort), features to disable SIMD (because
-# interrupts require the kernel to save and restore the state
-# of all registers each time, and SIMD registers are very
-# large, so they can considerably harm performance)...
+# some important information for the compiler: 
+# - The LLVM target (in the form of the target triplet
+# machine-vendor-os, here x86_64-unknown-none);
+# - The layout of the fundamental data types in memory (32-bit
+# aligned ints and floats, ...) 
+# - The endianness (little endian)
+# - The pointer width (64 bits)
+# - The panic strategy (abort, instead of unwind, since we
+#   don't have the necessary tools for that) 
+# - Disable the red zone: the "red zone" is a 128 byte region
+#   starting at RSP which is reserved for scratch data
+#   (allowing for optimizations if a functions' stack frame
+#   fits inside the region so that moving RSP is not
+#   necessary), but will only cause stack corruptions at this
+#   point;
+# - Disable SSE (Streaming SIMD Extensions) support: interrupts
+#   require the kernel to save and restore the state of all
+#   registers each time, and SIMD registers are very large, so
+#   they will only harm performance in this context. The same
+#   goes for MMX (MultiMedia eXtensions), an earlier,
+#   integer-only SIMD solution;
+# - Use soft floats: the x86_64 uses SSE by default for
+#   floating point operations, so instead of hard (as in
+#   "hardware") floats, we need to use soft floats, which are
+#   implemented in software.
 [build]
 target = "x86_64-axolotlos.json"
