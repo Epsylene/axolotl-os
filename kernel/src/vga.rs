@@ -1,3 +1,6 @@
+use lazy_static::lazy_static;
+use spin::Mutex;
+
 // The VGA text mode was introduced by IBM in 1987 to print
 // characters to the screen, by writing to a special region of
 // memory, the VGA buffer. This is a 2D array, of tipically
@@ -95,6 +98,33 @@ pub struct Writer {
     pub column_position: usize,
     pub color_code: ColorCode,
     pub buffer: &'static mut Buffer,
+}
+
+// We want to have a global instance of the Writer struct
+// instead of carrying it around, so we declare a static
+// variable; however, because some of the expressions are not
+// const-evaluable, we have to use the `lazy_static` crate to
+// delay the initialization of the variable until runtime. This
+// makes the Writer inmutable, however; we need a type that
+// provides interior mutability--so that we can change the
+// individual VGA cells--, but in a thread-safe way. We can't
+// use mutexes, since the kernel does not have blocking
+// support, but we can use spinlocks: these are locks that
+// cause any thread trying to acquire a resource to simply wait
+// in a loop ("spin") while repeatedly checking whether the
+// lock is available. In general multi-threaded contexts, this
+// is not efficient since the spinning threads are wasting CPU
+// cycles, but they avoid the overhead from OS rescheduling or
+// context switching, so they are useful if threads are likely
+// to be blocked for only short periods. The `spin` crate
+// provides a no_std implementation of spinlocks, allowing us
+// to safely mutate the Writer instance.
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
+        column_position: 0,
+        color_code: ColorCode::new(Color::LightGreen, Color::Black),
+        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
+    });
 }
 
 impl Writer {
