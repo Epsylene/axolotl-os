@@ -31,7 +31,7 @@ global boot
 ; Section label, used by the linker script to place this
 ; section at 0x7c00, since that is where the bootloader is
 ; supposed to start in memory.
-section .boot.text
+section .boot.initial
 
 ; Start of the bootloader. At this point, the CPU is in real
 ; mode, which is the mode that the BIOS uses to boot the
@@ -82,7 +82,7 @@ dw 0xaa55 ; "Magic number" that tells the BIOS that this is
 ; stage. The two stages are placed one right after the other,
 ; so the second one starts at 0x7e00, 512 bytes further than
 ; the first one.
-section .extended.text
+section .boot.extended
 extended_program:
     call clear_32           ; Clear the screen and
     mov esi, PROTECTED_MODE ; print a welcome message
